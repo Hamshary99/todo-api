@@ -17,7 +17,7 @@ Data is stored in-memory by default (non-persistent), but can be extended to use
 - Extensible service & repository layers
 - Easy to maintain and extend
 
-## 📌 API Routes
+## API Routes
 
 ### Create a Todo
 **POST** `/todos`
