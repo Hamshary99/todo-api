@@ -50,11 +50,16 @@ export class TodoRepository {
 
   async findAll({ status, page = 1, limit = 10 }) {
     await this.ready;
-    page = Number(page);
-    limit = Number(limit);
+    
+    page = Math.max(Number(page) || 1, 1);
+    limit = Math.max(Number(limit) || 10, 1);
 
     let results = [...this.todos];
-    if (status) results = results.filter((t) => t.status === status);
+
+    if (status) {
+      const statusLower = status.toLowerCase();
+      results = results.filter((t) => t.status?.toLowerCase() === statusLower);
+    }
 
     const total = results.length;
     const start = (page - 1) * limit;
