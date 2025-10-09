@@ -5,20 +5,27 @@ export class TodoController {
   constructor() {
     this.todoService = new TodoService();
 
-    // bind methods so "this" works inside Express routes
     this.createTodo = this.createTodo.bind(this);
     this.getTodos = this.getTodos.bind(this);
     this.getTodoById = this.getTodoById.bind(this);
     this.updateTodo = this.updateTodo.bind(this);
     this.deleteTodo = this.deleteTodo.bind(this);
     this.clearTodos = this.clearTodos.bind(this);
+    this.TaskCompleted = this.TaskCompleted.bind(this);
   }
 
   async createTodo(req, res, next) {
-    if (!req.body) throw new ApiError("Request body is missing", 400);
     try {
+      console.log("Incoming data:", req.body);
+      if (!req.body || Object.keys(req.body).length === 0)
+        throw new ApiError("Request body is missing", 400);
+
       const todo = await this.todoService.createTodo(req.body);
-      res.status(201).json({ success: true, data: todo });
+      res.status(201).json({
+        success: true,
+        message: "Todo created successfully",
+        data: todo,
+      });
     } catch (err) {
       next(err);
     }
@@ -28,39 +35,78 @@ export class TodoController {
     try {
       const { status, page, limit } = req.query;
       const todos = await this.todoService.getTodos({ status, page, limit });
-      res.json({ success: true, ...todos });
+
+      res.status(200).json({
+        success: true,
+        message: "Todos fetched successfully",
+        ...todos,
+      });
     } catch (err) {
       next(err);
     }
   }
 
   async getTodoById(req, res, next) {
-    if (!req.body || !req.params.id)
-      throw new ApiError("Request body is missing or missing ID", 400);
     try {
-      const todo = await this.todoService.getTodoById(req.params.id);
-      res.json({ success: true, data: todo });
+      const { id } = req.params;
+      if (!id) throw new ApiError("Missing Todo ID", 400);
+
+      const todo = await this.todoService.getTodoById(id);
+      res.status(200).json({
+        success: true,
+        message: "Todo fetched successfully",
+        data: todo,
+      });
     } catch (err) {
       next(err);
     }
   }
 
   async updateTodo(req, res, next) {
-    if (!req.body || !req.params.id)
-      throw new ApiError("Request body is missing or missing ID", 400);
     try {
-      const todo = await this.todoService.updateTodo(req.params.id, req.body);
-      res.json({ success: true, data: todo });
+      const { id } = req.params;
+      if (!id) throw new ApiError("Missing Todo ID", 400);
+      if (!req.body || Object.keys(req.body).length === 0)
+        throw new ApiError("Request body is missing", 400);
+
+      const updated = await this.todoService.updateTodo(id, req.body);
+      res.status(200).json({
+        success: true,
+        message: "Todo updated successfully",
+        data: updated,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async TaskCompleted(req, res, next) {
+    try {
+      const { id } = req.params;
+      if (!id) throw new ApiError("Missing Todo ID", 400);
+
+      const todo = await this.todoService.TaskCompleted(id);
+      res.status(200).json({
+        success: true,
+        message: "Todo marked as completed",
+        data: todo,
+      });
     } catch (err) {
       next(err);
     }
   }
 
   async deleteTodo(req, res, next) {
-    if (!req.params.id) throw new ApiError("Missing ID", 400);
     try {
-      const todo = await this.todoService.deleteTodo(req.params.id);
-      res.json({ success: true, data: todo });
+      const { id } = req.params;
+      if (!id) throw new ApiError("Missing Todo ID", 400);
+
+      const deleted = await this.todoService.deleteTodo(id);
+      res.status(200).json({
+        success: true,
+        message: "Todo deleted successfully",
+        data: deleted,
+      });
     } catch (err) {
       next(err);
     }
@@ -69,7 +115,11 @@ export class TodoController {
   async clearTodos(req, res, next) {
     try {
       const todos = await this.todoService.clearTodos();
-      res.json({ success: true, data: todos });
+      res.status(200).json({
+        success: true,
+        message: "All todos cleared successfully",
+        data: todos,
+      });
     } catch (err) {
       next(err);
     }

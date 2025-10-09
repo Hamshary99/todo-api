@@ -14,7 +14,9 @@ export class TodoRepository {
   async _init() {
     try {
       const fileData = await fs.readFile(DATA_FILE, "utf-8");
-      this.todos = JSON.parse(fileData);
+
+      // handle empty or invalid JSON safely
+      this.todos = fileData.trim() ? JSON.parse(fileData) : [];
     } catch (err) {
       if (err.code === "ENOENT") {
         await fs.mkdir(path.dirname(DATA_FILE), { recursive: true });
@@ -22,9 +24,14 @@ export class TodoRepository {
         this.todos = [];
       } else {
         console.error("Error initializing TodoRepository:", err);
-        throw new ApiError("Failed to load data file", 500);
+        this.todos = [];
       }
     }
+  }
+
+  getNextId() {
+    if (this.todos.length === 0) return 1;
+    return Math.max(...this.todos.map((t) => Number(t.id))) + 1;
   }
 
   async saveToFile() {
@@ -34,7 +41,8 @@ export class TodoRepository {
 
   async create(data) {
     await this.ready;
-    const todo = new Todo(data);
+    const id = data.id ?? this.getNextId(); // use next numeric id if not provided
+    const todo = new Todo({ ...data, id });
     this.todos.push(todo);
     await this.saveToFile();
     return todo;

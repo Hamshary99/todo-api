@@ -1,13 +1,16 @@
 import express from "express";
+import cors from "cors"; 
 import dotenv from "dotenv";
 import todoRoutes from "./routes/toDoRoutes.js";
 import { handleError } from "./middlewares/errorHandler.js";
 
 dotenv.config();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 const app = express();
+
+app.use(cors({ origin: "http://localhost:5173" }));
 
 // Middleware
 app.use(express.json());

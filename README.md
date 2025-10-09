@@ -11,11 +11,19 @@ Data is stored in-memory by default (non-persistent), but can be extended to use
 
 ## Features
 
-- Create, Read, Update, Delete (CRUD) todos
+- Full CRUD (Create, Read, Update, Delete) for Todos
 - Pagination & filtering by status
-- Centralized error handling with custom ApiError
-- Extensible service & repository layers
-- Easy to maintain and extend
+- File-based persistence (stored in /data/todos.json)
+- Centralized error handling with custom ApiError class
+- Repository & Service layers for clean architecture
+- Extensible and maintainable structure (easily replace file storage with a DB later)
+
+## Tech Stack
+
+- Node.js + Express
+- fs/promises for file persistence
+- CORS for frontend access
+- Nodemon for live development reloads
 
 ## API Routes
 
@@ -89,7 +97,8 @@ Data is stored in-memory by default (non-persistent), but can be extended to use
 
 ## Future Improvements
 
-- File/database persistence
-- Input validation middleware (Joi/Zod)
-- Authentication & users
-- Testing with Jest/Supertest
+- Replace file storage with SQLite / MongoDB
+- Add input validation (Joi / Zod)
+- Add authentication & users
+- Implement testing (Jest / Supertest)
+- Add frontend pagination controls

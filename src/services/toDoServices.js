@@ -1,5 +1,6 @@
 import { TodoRepository } from "../repository/todoRepository.js";
 import { ApiError } from "../middlewares/errorHandler.js";
+import { v4 as uuidv4 } from "uuid";
 
 export class TodoService {
   constructor() {
@@ -19,21 +20,15 @@ export class TodoService {
       );
     }
 
-    // Handle unique ID or auto-generate one
-    const existing = await this.todoRepository.findById(data.id);
-    if (data.id && existing) {
-      throw new ApiError("ID must be unique", 400);
-    }
+    // Let repository handle ID logic
+    const todo = await this.todoRepository.create({
+      title: data.title.trim(),
+      description: data.description || "",
+      status: data.status || "pending",
+      doneAt: null,
+    });
 
-    // Auto-generate numeric ID if not provided
-    const all = await this.todoRepository.findAll({ page: 1, limit: Infinity });
-    const newId =
-      data.id ??
-      (all.data.length > 0
-        ? Math.max(...all.data.map((t) => Number(t.id))) + 1
-        : 1);
-
-    return await this.todoRepository.create({ ...data, id: newId });
+    return todo;
   }
 
   async getTodos(query) {
@@ -42,39 +37,50 @@ export class TodoService {
 
   async getTodoById(id) {
     const todo = await this.todoRepository.findById(id);
-    if (!todo) {
-      throw new ApiError("Todo not found", 404);
-    }
+    if (!todo) throw new ApiError("Todo not found", 404);
     return todo;
   }
 
   async updateTodo(id, data) {
     if (data.status && !this.validStatuses.includes(data.status)) {
       throw new ApiError(
-        `Invalid status. Allowed: ${this.validStatuses.join(", ")}`,
+        `Invalid status. Allowed values: ${this.validStatuses.join(", ")}`,
         400
       );
     }
 
     const updated = await this.todoRepository.update(id, data);
-    if (!updated) {
-      throw new ApiError("Todo not found", 404);
+    if (!updated) throw new ApiError("Todo not found", 404);
+
+    if (data.status === "done" && !updated.doneAt) {
+      updated.doneAt = new Date().toISOString();
+      await this.todoRepository.saveToFile();
     }
 
-    // Auto-set doneAt when status = "done"
-    if (data.status === "done") {
-      updated.doneAt = new Date().toISOString();
+    if (data.status && data.status !== "done" && updated.doneAt) {
+      updated.doneAt = null;
       await this.todoRepository.saveToFile();
     }
 
     return updated;
   }
 
+  async TaskCompleted(id) {
+    const todo = await this.todoRepository.findById(id);
+    if (!todo) throw new ApiError("Todo not found", 404);
+    if (todo.status === "done")
+      throw new ApiError("Todo is already marked as completed", 400);
+
+    todo.status = "done";
+    todo.doneAt = new Date().toISOString();
+
+    await this.todoRepository.saveToFile();
+    return todo;
+  }
+
   async deleteTodo(id) {
     const deleted = await this.todoRepository.delete(id);
-    if (!deleted) {
-      throw new ApiError("Todo not found", 404);
-    }
+    if (!deleted) throw new ApiError("Todo not found", 404);
     return deleted;
   }
 
