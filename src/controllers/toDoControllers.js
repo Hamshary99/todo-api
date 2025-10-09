@@ -1,4 +1,4 @@
-import { TodoService } from "../services/toDoServices.js";
+import { TodoService } from "../services/todoServices.js";
 import { ApiError } from "../middlewares/errorHandler.js";
 
 export class TodoController {

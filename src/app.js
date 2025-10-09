@@ -17,7 +17,10 @@ app.use("/todos", todoRoutes);
 
 // Health check
 app.get("/health", (req, res) => {
-  res.json({ status: "Todo app is fine and running", timeStamp: new Date().toISOString() });
+  res.json({
+    status: "Todo app is fine and running",
+    timeStamp: new Date().toISOString(),
+  });
 });
 
 // Error handler
