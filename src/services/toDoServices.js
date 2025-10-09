@@ -1,6 +1,5 @@
 import { TodoRepository } from "../repository/todoRepository.js";
 import { ApiError } from "../middlewares/errorHandler.js";
-import { v4 as uuidv4 } from "uuid";
 
 export class TodoService {
   constructor() {
@@ -74,6 +73,24 @@ export class TodoService {
     todo.status = "done";
     todo.doneAt = new Date().toISOString();
 
+    await this.todoRepository.saveToFile();
+    return todo;
+  }
+
+
+  async markAsInProgress(id) {
+    const todo = await this.todoRepository.findById(id);
+    if (!todo) throw new ApiError("Todo not found", 404);
+
+    if (todo.status === "in-progress")
+      throw new ApiError("Todo is already in progress", 400);
+
+    // If it was done before, reset doneAt
+    if (todo.status === "done") {
+      todo.doneAt = null;
+    }
+
+    todo.status = "in-progress";
     await this.todoRepository.saveToFile();
     return todo;
   }

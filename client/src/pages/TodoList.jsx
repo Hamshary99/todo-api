@@ -38,6 +38,11 @@ export default function TodoList() {
     await axios.patch(`${API_URL}/${id}/complete`);
     fetchTodos();
   };
+
+  const handleInProgress = async (id) => {
+    await axios.patch(`${API_URL}/${id}/in-progress`);
+    fetchTodos();
+  }
   const handleDelete = async (id) => {
     await axios.delete(`${API_URL}/${id}`);
     fetchTodos(page);
@@ -90,6 +95,7 @@ export default function TodoList() {
               onComplete={() => handleComplete(todo.id)}
               onDelete={() => handleDelete(todo.id)}
               onUpdated={() => fetchTodos(page)}
+              onInProgress={() => handleInProgress(todo.id)}
             />
           ))
         )}

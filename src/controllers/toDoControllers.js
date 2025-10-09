@@ -12,6 +12,7 @@ export class TodoController {
     this.deleteTodo = this.deleteTodo.bind(this);
     this.clearTodos = this.clearTodos.bind(this);
     this.TaskCompleted = this.TaskCompleted.bind(this);
+    this.TaskInProgress = this.TaskInProgress.bind(this);
   }
 
   async createTodo(req, res, next) {
@@ -89,6 +90,22 @@ export class TodoController {
       res.status(200).json({
         success: true,
         message: "Todo marked as completed",
+        data: todo,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async TaskInProgress(req, res, next) {
+    try {
+      const { id } = req.params;
+      if (!id) throw new ApiError("Missing Todo ID", 400);
+
+      const todo = await this.todoService.markAsInProgress(id);
+      res.status(200).json({
+        success: true,
+        message: "Todo marked as in-progress",
         data: todo,
       });
     } catch (err) {

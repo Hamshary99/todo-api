@@ -15,6 +15,8 @@ router.patch("/:id", todoController.updateTodo);
 
 router.patch("/:id/complete", todoController.TaskCompleted); 
 
+router.patch("/:id/in-progress", todoController.TaskInProgress);
+
 router.delete("/:id", todoController.deleteTodo);
 
 router.delete("/", todoController.clearTodos);
